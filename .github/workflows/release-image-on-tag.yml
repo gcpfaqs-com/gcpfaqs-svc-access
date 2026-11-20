@@ -10,16 +10,16 @@ permissions:
 
 jobs:
   gitleaks:
-    name: Gitleaks full Git history
+    name: Gitleaks (full Git history)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout full history
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Scan secrets
-        uses: gitleaks/gitleaks-action@v2
+      - name: Scan secrets with Gitleaks CLI
+        run: |
+          docker run --rm -v "${{ github.workspace }}:/repo" zricethezav/gitleaks:latest git /repo -v --exit-code 1
 
   go-security:
     name: Snyk SCA and gosec SAST
