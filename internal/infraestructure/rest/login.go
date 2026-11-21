@@ -35,20 +35,23 @@ func NewRESTLoginUseCase(
 }
 
 func (uc *RESTLoginUseCase) Login(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	var dto loginDTO
 	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(errorResponseDTO{Error: "invalid request body"})
 		return
 	}
 
 	saveUC := application.NewLoginAccessUseCase(uc.repository, uc.hasher, uc.tokener)
 	token, err := saveUC.Login(dto.Username, dto.Password)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(errorResponseDTO{Error: err.Error()})
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(loginResponseDTO{Token: *token})
 }

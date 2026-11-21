@@ -37,21 +37,24 @@ func NewRESTRegisterUseCase(
 }
 
 func (uc *RESTRegisterUseCase) Register(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	var dto registerDTO
 	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(errorResponseDTO{Error: "invalid request body"})
 		return
 	}
 
 	saveUC := application.NewRegisterAccessUseCase(uc.repository, uc.hasher, uc.tokener)
 	id, err := saveUC.Register(dto.Username, dto.Password, dto.Name)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(errorResponseDTO{Error: err.Error()})
 		return
 	}
 
 	dto.ID = id
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(registerResponseDTO{ID: dto.ID})
 }

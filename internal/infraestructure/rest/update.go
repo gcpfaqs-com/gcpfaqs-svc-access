@@ -25,26 +25,30 @@ func NewRESTUpdateUseCase(repository persistence.AccessRepository, tokener secur
 }
 
 func (uc *RESTUpdateUseCase) Update(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	idStr := r.Header.Get("Authorization")
 	subject, err := uc.tokener.DecodeToken(idStr)
 	if err != nil {
-		http.Error(w, "invalid token", http.StatusUnauthorized)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(errorResponseDTO{Error: "invalid token"})
 		return
 	}
 
 	var dto updateDTO
 	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(errorResponseDTO{Error: "invalid request body"})
 		return
 	}
 
 	updateUC := application.NewUpdateAccessUseCase(uc.repository)
 	err = updateUC.Update(subject, dto.Name)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(errorResponseDTO{Error: err.Error()})
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 }
