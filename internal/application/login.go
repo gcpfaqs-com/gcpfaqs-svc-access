@@ -13,9 +13,7 @@ type LoginAccessUseCase struct {
 }
 
 func NewLoginAccessUseCase(repo persistence.AccessRepository, hasher secure.Hasher, tokener secure.Tokener) *LoginAccessUseCase {
-
 	return &LoginAccessUseCase{repository: repo, hasher: hasher, tokener: tokener}
-
 }
 
 func (uc *LoginAccessUseCase) Login(username, password string) (*string, error) {

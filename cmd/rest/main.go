@@ -33,7 +33,7 @@ func main() {
 
 	repo := postgres.NewPostgresAccessRepository(db)
 	registerHandler := rest.NewRESTRegisterUseCase(repo, hasher, tokener)
-	updateHandler := rest.NewRESTUpdateUseCase(repo)
+	updateHandler := rest.NewRESTUpdateUseCase(repo, tokener)
 	loginHandler := rest.NewRESTLoginUseCase(repo, hasher, tokener)
 	mux := http.NewServeMux()
 
@@ -45,7 +45,7 @@ func main() {
 		loginHandler.Login(w, r)
 	})
 
-	mux.HandleFunc("PUT /api/accesss/{id}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("PUT /api/accesss", func(w http.ResponseWriter, r *http.Request) {
 		updateHandler.Update(w, r)
 	})
 

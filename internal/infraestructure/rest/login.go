@@ -13,7 +13,7 @@ type loginDTO struct {
 	Password string `json:"password,omitempty"`
 }
 
-type tokenDTO struct {
+type loginResponseDTO struct {
 	Token string `json:"token"`
 }
 
@@ -50,5 +50,5 @@ func (uc *RESTLoginUseCase) Login(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(tokenDTO{Token: *token})
+	json.NewEncoder(w).Encode(loginResponseDTO{Token: *token})
 }

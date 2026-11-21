@@ -39,3 +39,23 @@ func (g *JWTGenerator) Generate(subject string) (string, error) {
 
 	return signed, nil
 }
+
+func (g *JWTGenerator) DecodeToken(tokenString string) (string, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &jwt.RegisteredClaims{},
+		func(token *jwt.Token) (any, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			return g.secret, nil
+		})
+
+	if err != nil {
+		return "", fmt.Errorf("failed to parse token: %w", err)
+	}
+
+	if claims, ok := token.Claims.(*jwt.RegisteredClaims); ok && token.Valid {
+		return claims.Subject, nil
+	}
+
+	return "", fmt.Errorf("invalid token")
+}
