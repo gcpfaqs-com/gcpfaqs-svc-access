@@ -8,6 +8,15 @@ import (
 	"net/http"
 )
 
+type loginDTO struct {
+	Username string `json:"username"`
+	Password string `json:"password,omitempty"`
+}
+
+type tokenDTO struct {
+	Token string `json:"token"`
+}
+
 type RESTLoginUseCase struct {
 	repository persistence.AccessRepository
 	hasher     secure.Hasher
@@ -26,7 +35,7 @@ func NewRESTLoginUseCase(
 }
 
 func (uc *RESTLoginUseCase) Login(w http.ResponseWriter, r *http.Request) {
-	var dto accessDTO
+	var dto loginDTO
 	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
@@ -40,6 +49,6 @@ func (uc *RESTLoginUseCase) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(token)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(tokenDTO{Token: *token})
 }

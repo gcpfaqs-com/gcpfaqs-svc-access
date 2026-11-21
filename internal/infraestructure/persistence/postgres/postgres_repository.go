@@ -5,6 +5,7 @@ import (
 	"gcpaccesss-svc-accesss/internal/domain/models"
 	"gcpaccesss-svc-accesss/internal/domain/persistence"
 	"gcpaccesss-svc-accesss/internal/domain/types"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -14,10 +15,12 @@ type PostgresAccessRepository struct {
 }
 
 type accessRecord struct {
-	ID       string `gorm:"primaryKey;type:uuid;not null"`
-	Username string `gorm:"not null"`
-	Password string `gorm:"not null"`
-	Name     string `gorm:"not null"`
+	ID        string    `gorm:"primaryKey;type:uuid;not null"`
+	Username  string    `gorm:"not null"`
+	Password  string    `gorm:"not null"`
+	Name      string    `gorm:"not null"`
+	CreatedAt time.Time `gorm:"not null"`
+	UpdatedAt time.Time `gorm:"not null"`
 }
 
 func (accessRecord) TableName() string {
@@ -38,7 +41,7 @@ func NewPostgresAccessRepository(db *gorm.DB) persistence.AccessRepository {
 
 func (r *PostgresAccessRepository) Save(access *models.Access) error {
 	if access == nil {
-		return errors.New("access is nil")
+		return errors.New("invalid access: access is nil")
 	}
 	if r.db == nil {
 		return errors.New("database connection is nil")
@@ -47,14 +50,16 @@ func (r *PostgresAccessRepository) Save(access *models.Access) error {
 		access.Username == nil ||
 		access.Password == nil ||
 		access.Name == nil {
-		return errors.New("access is incomplete")
+		return errors.New("invalid access: access is incomplete")
 	}
 
 	payload := accessRecord{
-		ID:       access.ID.Value(),
-		Username: access.Username.Value(),
-		Password: access.Password.Value(),
-		Name:     access.Name.Value(),
+		ID:        access.ID.Value(),
+		Username:  access.Username.Value(),
+		Password:  access.Password.Value(),
+		Name:      access.Name.Value(),
+		CreatedAt: access.CreatedAt,
+		UpdatedAt: access.UpdatedAt,
 	}
 
 	return r.db.Save(&payload).Error
@@ -62,7 +67,7 @@ func (r *PostgresAccessRepository) Save(access *models.Access) error {
 
 func (r *PostgresAccessRepository) Get(id *types.ID) (*models.Access, error) {
 	if id == nil {
-		return nil, errors.New("access id is nil")
+		return nil, errors.New("invalid access: access id is nil")
 	}
 	if r.db == nil {
 		return nil, errors.New("database connection is nil")
@@ -98,10 +103,12 @@ func (r *PostgresAccessRepository) Get(id *types.ID) (*models.Access, error) {
 	}
 
 	return &models.Access{
-		ID:       accessID,
-		Username: accessUsername,
-		Password: accessPassword,
-		Name:     accessName,
+		ID:        accessID,
+		Username:  accessUsername,
+		Password:  accessPassword,
+		Name:      accessName,
+		CreatedAt: payload.CreatedAt,
+		UpdatedAt: payload.UpdatedAt,
 	}, nil
 }
 
@@ -143,35 +150,18 @@ func (r *PostgresAccessRepository) GetFromUsername(username string) (*models.Acc
 	}
 
 	return &models.Access{
-		ID:       accessID,
-		Username: accessUsername,
-		Password: accessPassword,
-		Name:     accessName,
+		ID:        accessID,
+		Username:  accessUsername,
+		Password:  accessPassword,
+		Name:      accessName,
+		CreatedAt: payload.CreatedAt,
+		UpdatedAt: payload.UpdatedAt,
 	}, nil
-}
-
-func (r *PostgresAccessRepository) Delete(id *types.ID) error {
-	if id == nil {
-		return errors.New("access id is nil")
-	}
-	if r.db == nil {
-		return errors.New("database connection is nil")
-	}
-
-	result := r.db.Delete(&accessRecord{}, "id = ?", id.Value())
-	if result.Error != nil {
-		return result.Error
-	}
-	if result.RowsAffected == 0 {
-		return gorm.ErrRecordNotFound
-	}
-
-	return nil
 }
 
 func (r *PostgresAccessRepository) Update(access *models.Access) error {
 	if access == nil {
-		return errors.New("access is nil")
+		return errors.New("invalid access: access is nil")
 	}
 	if r.db == nil {
 		return errors.New("database connection is nil")
@@ -180,14 +170,16 @@ func (r *PostgresAccessRepository) Update(access *models.Access) error {
 		access.Username == nil ||
 		access.Password == nil ||
 		access.Name == nil {
-		return errors.New("access is incomplete")
+		return errors.New("invalid access: access is incomplete")
 	}
 
 	payload := accessRecord{
-		ID:       access.ID.Value(),
-		Username: access.Username.Value(),
-		Password: access.Password.Value(),
-		Name:     access.Name.Value(),
+		ID:        access.ID.Value(),
+		Username:  access.Username.Value(),
+		Password:  access.Password.Value(),
+		Name:      access.Name.Value(),
+		CreatedAt: access.CreatedAt,
+		UpdatedAt: access.UpdatedAt,
 	}
 
 	result := r.db.Model(&accessRecord{}).Where("id = ?", payload.ID).Updates(payload)
@@ -199,47 +191,4 @@ func (r *PostgresAccessRepository) Update(access *models.Access) error {
 	}
 
 	return nil
-}
-
-func (r *PostgresAccessRepository) List() ([]*models.Access, error) {
-	if r.db == nil {
-		return nil, errors.New("database connection is nil")
-	}
-
-	var payloads []accessRecord
-	if err := r.db.Find(&payloads).Error; err != nil {
-		return nil, err
-	}
-
-	accesss := make([]*models.Access, 0, len(payloads))
-	for _, payload := range payloads {
-		accessID, err := types.NewIDFromString(payload.ID)
-		if err != nil {
-			return nil, err
-		}
-
-		accessUsername, err := types.NewUsername(payload.Username)
-		if err != nil {
-			return nil, err
-		}
-
-		accessPassword, err := types.NewPassword(payload.Password)
-		if err != nil {
-			return nil, err
-		}
-
-		accessName, err := types.NewName(payload.Name)
-		if err != nil {
-			return nil, err
-		}
-
-		accesss = append(accesss, &models.Access{
-			ID:       accessID,
-			Username: accessUsername,
-			Password: accessPassword,
-			Name:     accessName,
-		})
-	}
-
-	return accesss, nil
 }

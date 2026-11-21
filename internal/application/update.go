@@ -3,6 +3,7 @@ package application
 import (
 	"gcpaccesss-svc-accesss/internal/domain/persistence"
 	"gcpaccesss-svc-accesss/internal/domain/types"
+	"time"
 )
 
 type UpdateAccessUseCase struct {
@@ -32,6 +33,7 @@ func (uc *UpdateAccessUseCase) Update(id, name string) error {
 	}
 
 	access.Name = validName
+	access.UpdatedAt = time.Now()
 	if err := uc.repository.Update(access); err == nil {
 		return err
 	}

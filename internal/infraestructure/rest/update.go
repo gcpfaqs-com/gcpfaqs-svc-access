@@ -7,6 +7,10 @@ import (
 	"net/http"
 )
 
+type updateDTO struct {
+	Name string `json:"name"`
+}
+
 type RESTUpdateUseCase struct {
 	repository persistence.AccessRepository
 }
@@ -20,7 +24,7 @@ func NewRESTUpdateUseCase(repository persistence.AccessRepository) *RESTUpdateUs
 func (uc *RESTUpdateUseCase) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 
-	var dto accessDTO
+	var dto updateDTO
 	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
@@ -33,7 +37,7 @@ func (uc *RESTUpdateUseCase) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dto.ID = idStr
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(dto)
 }

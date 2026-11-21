@@ -25,7 +25,7 @@ func (uc *LoginAccessUseCase) Login(username, password string) (*string, error) 
 	}
 
 	if err := uc.hasher.Verify(access.Password.Value(), password); err != nil {
-		return nil, err
+		return nil, errors.New("invalid credentials")
 	}
 
 	token, err := uc.tokener.Generate(access.ID.Value())

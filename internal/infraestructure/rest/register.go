@@ -8,6 +8,17 @@ import (
 	"net/http"
 )
 
+type registerDTO struct {
+	ID       string `json:"id,omitempty"`
+	Username string `json:"username"`
+	Password string `json:"password,omitempty"`
+	Name     string `json:"name"`
+}
+
+type registerResponseDTO struct {
+	ID string `json:"id"`
+}
+
 type RESTRegisterUseCase struct {
 	repository persistence.AccessRepository
 	hasher     secure.Hasher
@@ -26,7 +37,7 @@ func NewRESTRegisterUseCase(
 }
 
 func (uc *RESTRegisterUseCase) Register(w http.ResponseWriter, r *http.Request) {
-	var dto accessDTO
+	var dto registerDTO
 	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
@@ -42,5 +53,5 @@ func (uc *RESTRegisterUseCase) Register(w http.ResponseWriter, r *http.Request) 
 	dto.ID = id
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(dto)
+	json.NewEncoder(w).Encode(registerResponseDTO{ID: dto.ID})
 }

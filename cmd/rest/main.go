@@ -26,10 +26,7 @@ import (
 const databaseDSN = "accesss-database-dsn"
 
 func main() {
-	db, err := connectDatabase()
-	if err != nil {
-		log.Fatalf("database connectivity check failed: %v", err)
-	}
+	db := connectDatabase()
 
 	hasher := secure.NewBCryptHasher()
 	tokener := secure.NewJWTGenerator([]byte(os.Getenv("JWT_SECRET")), os.Getenv("JWT_ISSUER"), 24*time.Hour)
@@ -42,7 +39,6 @@ func main() {
 
 	mux.HandleFunc("POST /api/accesss/register", func(w http.ResponseWriter, r *http.Request) {
 		registerHandler.Register(w, r)
-
 	})
 
 	mux.HandleFunc("POST /api/accesss/login", func(w http.ResponseWriter, r *http.Request) {
@@ -78,28 +74,28 @@ func corsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func connectDatabase() (*gorm.DB, error) {
+func connectDatabase() *gorm.DB {
 	dsn, err := resolveDSN()
 	if err != nil {
-		return nil, err
+		log.Fatalf("database connectivity check failed: %v", err)
 	}
 
 	db, err := gorm.Open(pgdriver.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return nil, err
+		log.Fatalf("failed to connect to database: %v", err)
 	}
 
 	sqlDB, err := db.DB()
 	if err != nil {
-		return nil, err
+		log.Fatalf("failed to get database instance: %v", err)
 	}
 
 	if err := sqlDB.Ping(); err != nil {
 		_ = sqlDB.Close()
-		return nil, err
+		log.Fatalf("database connectivity check failed: %v", err)
 	}
 
-	return db, nil
+	return db
 }
 
 func resolveDSN() (string, error) {
