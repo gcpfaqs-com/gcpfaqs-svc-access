@@ -1,8 +1,8 @@
 package test
 
 import (
-	"gcpfaqs-svc-faqs/internal/domain/models"
-	"gcpfaqs-svc-faqs/internal/domain/types"
+	"gcpaccesss-svc-accesss/internal/domain/models"
+	"gcpaccesss-svc-accesss/internal/domain/types"
 )
 
 type StubRepository struct {
@@ -31,10 +31,10 @@ func (r *StubRepository) GetHaveBeenCalled() bool {
 	return result
 }
 
-func (r *StubRepository) Get(id *types.ID) (*models.Faq, error) {
+func (r *StubRepository) Get(id *types.ID) (*models.Access, error) {
 	r.getCalled = true
 
-	return &models.Faq{}, nil
+	return &models.Access{}, nil
 }
 
 func (r *StubRepository) SaveHaveBeenCalled() bool {
@@ -45,7 +45,7 @@ func (r *StubRepository) SaveHaveBeenCalled() bool {
 	return result
 }
 
-func (r *StubRepository) Save(replaceme *models.Faq) error {
+func (r *StubRepository) Save(replaceme *models.Access) error {
 	r.saveCalled = true
 
 	return nil
@@ -73,7 +73,7 @@ func (r *StubRepository) UpdateHaveBeenCalled() bool {
 	return result
 }
 
-func (r *StubRepository) Update(replaceme *models.Faq) error {
+func (r *StubRepository) Update(replaceme *models.Access) error {
 	r.updateCalled = true
 
 	return nil
@@ -87,8 +87,8 @@ func (r *StubRepository) ListHaveBeenCalled() bool {
 	return result
 }
 
-func (r *StubRepository) List() ([]*models.Faq, error) {
+func (r *StubRepository) List() ([]*models.Access, error) {
 	r.listCalled = true
 
-	return []*models.Faq{}, nil
+	return []*models.Access{}, nil
 }

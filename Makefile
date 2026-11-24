@@ -6,3 +6,6 @@ stop-db:
 
 start:
 	SERVER_ADDRESS=":8082" DATABASE_DSN="host=localhost port=5433 user=postgres password=postgres dbname=gcpfaqs-svc-accesss_test sslmode=disable" go run cmd/rest/main.go
+
+test:
+	go clean -testcache && go test  ./...
