@@ -2,9 +2,9 @@ package rest
 
 import (
 	"encoding/json"
-	"gcpaccesss-svc-accesss/internal/application"
 	"gcpaccesss-svc-accesss/internal/domain/persistence"
 	"gcpaccesss-svc-accesss/internal/domain/secure"
+	"gcpaccesss-svc-accesss/internal/domain/services"
 	"net/http"
 )
 
@@ -46,8 +46,8 @@ func (uc *RESTRegisterUseCase) Register(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	saveUC := application.NewRegisterAccessUseCase(uc.repository, uc.hasher, uc.tokener)
-	id, err := saveUC.Register(dto.Username, dto.Password, dto.Name)
+	saveUC := services.NewRegisterAccessUseCase(uc.repository, uc.hasher, uc.tokener)
+	id, err := saveUC.Do(dto.Username, dto.Password, dto.Name)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(errorResponseDTO{Error: err.Error()})

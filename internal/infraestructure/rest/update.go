@@ -2,9 +2,9 @@ package rest
 
 import (
 	"encoding/json"
-	"gcpaccesss-svc-accesss/internal/application"
 	"gcpaccesss-svc-accesss/internal/domain/persistence"
 	"gcpaccesss-svc-accesss/internal/domain/secure"
+	"gcpaccesss-svc-accesss/internal/domain/services"
 	"net/http"
 )
 
@@ -42,8 +42,8 @@ func (uc *RESTUpdateUseCase) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updateUC := application.NewUpdateAccessUseCase(uc.repository)
-	err = updateUC.Update(subject, dto.Name)
+	updateUC := services.NewUpdateAccessUseCase(uc.repository)
+	err = updateUC.Do(subject, dto.Name)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(errorResponseDTO{Error: err.Error()})

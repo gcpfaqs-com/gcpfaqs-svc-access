@@ -2,9 +2,9 @@ package rest
 
 import (
 	"encoding/json"
-	"gcpaccesss-svc-accesss/internal/application"
 	"gcpaccesss-svc-accesss/internal/domain/persistence"
 	"gcpaccesss-svc-accesss/internal/domain/secure"
+	"gcpaccesss-svc-accesss/internal/domain/services"
 	"net/http"
 )
 
@@ -44,8 +44,8 @@ func (uc *RESTLoginUseCase) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	saveUC := application.NewLoginAccessUseCase(uc.repository, uc.hasher, uc.tokener)
-	token, err := saveUC.Login(dto.Username, dto.Password)
+	saveUC := services.NewLoginAccessUseCase(uc.repository, uc.hasher, uc.tokener)
+	token, err := saveUC.Do(dto.Username, dto.Password)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(errorResponseDTO{Error: err.Error()})

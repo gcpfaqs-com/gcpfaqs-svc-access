@@ -1,4 +1,4 @@
-package application
+package services
 
 import (
 	"errors"
@@ -16,7 +16,7 @@ func NewLoginAccessUseCase(repo persistence.AccessRepository, hasher secure.Hash
 	return &LoginAccessUseCase{repository: repo, hasher: hasher, tokener: tokener}
 }
 
-func (uc *LoginAccessUseCase) Login(username, password string) (*string, error) {
+func (uc *LoginAccessUseCase) Do(username, password string) (*string, error) {
 	access, err := uc.repository.GetFromUsername(username)
 	if err != nil {
 		return nil, errors.New("invalid credentials")

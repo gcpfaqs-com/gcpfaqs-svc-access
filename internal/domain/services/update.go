@@ -1,4 +1,4 @@
-package application
+package services
 
 import (
 	"gcpaccesss-svc-accesss/internal/domain/persistence"
@@ -16,7 +16,7 @@ func NewUpdateAccessUseCase(repo persistence.AccessRepository) *UpdateAccessUseC
 
 }
 
-func (uc *UpdateAccessUseCase) Update(id, name string) error {
+func (uc *UpdateAccessUseCase) Do(id, name string) error {
 	validID, err := types.NewIDFromString(id)
 	if err != nil {
 		return err

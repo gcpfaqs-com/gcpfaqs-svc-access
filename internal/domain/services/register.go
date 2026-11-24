@@ -1,4 +1,4 @@
-package application
+package services
 
 import (
 	"gcpaccesss-svc-accesss/internal/domain/models"
@@ -26,7 +26,7 @@ func NewRegisterAccessUseCase(
 
 }
 
-func (uc *RegisterAccessUseCase) Register(username, password, name string) (string, error) {
+func (uc *RegisterAccessUseCase) Do(username, password, name string) (string, error) {
 	access, err := models.NewAccess(username, password, name)
 	if err != nil {
 		return "", err
